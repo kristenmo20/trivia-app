@@ -3,28 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Trivia Application</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inria+Sans:wght@400;700&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="home-styles.css">
 
-    <style>
-        @keyframes fade-out {
-            0% {
-                opacity: 1;
-            }
+    <title>APP TRIVIA</title>
 
-            100% {
-                opacity: 0;
-            }
-        }
+  
 
-        p {
-            animation: fade-out 5s ease-in 0.1s forwards;
-        }
-    </style>
-    
 </head>
-<body>
-    <h1>Trivia Application</h1>
 
-    <p>This is a paragraph!</p>
+<body>
+    <div class="container stage">
+        <div id="home" class="flex-center flex-column">
+            <img class="logo logo-animation bounce-6" src="logo.png" alt="">
+            <a class="home-button" href="#">Play</a>
+            <a class="home-button" href="#">Leaderboard</a>
+        </div>
+    </div>
+
 </body>
 </html>
