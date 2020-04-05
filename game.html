@@ -104,7 +104,6 @@
       <div class="div1">
           <h1>APP TRIVIA</h1>
       </div>
-
       <div class="div2">
           <!-- Play area -->
           <template id="tplSelectName">
@@ -137,7 +136,7 @@
               }
               
               document.querySelector('form#name-select').addEventListener('submit', nameSubmit);
-            </script> 
+            </script>
           </template>
           <template id="tplMessage">
             <div class="message">
@@ -198,14 +197,6 @@
                 </div>
               </div>
             </div>
-            <div>
-              <button id="remove" ng-click="remove(expense)">Clear Local Storage</button>
-            </div>
-            <script>
-              $scope.remove = function (itemTodelete) {
-             localStorage.removeItem(itemTodelete);
-        },
-            </script>
 
       </div>
       <div class="div3">
@@ -241,7 +232,6 @@
                 
                 chatName.value = '';
               }
-            
               
               document.querySelector('#user-add').addEventListener('submit', addNewUser);
             </script>
@@ -265,10 +255,12 @@
       <div class="div7">
           <!-- All user scores -->
           <h4>Scoreboard:</h4>
-            <p id="user-name">
-              <p id="userScore"></p>
-            </p>  
-        </div>
+            <div id="user-scores">
+              <p class="user-name">
+                <p class="userScore"></p>
+              </p>
+              
+          </div>
       </div>
       </div>
 </body>
