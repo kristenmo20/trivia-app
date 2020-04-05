@@ -90,14 +90,71 @@
 </head>
 
 <body>
+
+  <nav class="flexContainer blueBackground">
+    <ul class="nav flexItem flexStart">
+        <li><a href="/index.html">APP TRIVIA</a></li>
+    </ul>
+    <ul class="nav flexContainer flexEnd">
+        <li><a href="/index.html">Home</a></li>
+        <li><a href="#">Leaderboard</a></li>
+    </ul>
+</nav>
   <div class="parent">
       <div class="div1">
           <h1>APP TRIVIA</h1>
       </div>
+
       <div class="div2">
           <!-- Play area -->
+          <template id="tplSelectName">
+            <form id="name-select" class="name-select">
+              <h2>
+                Enter a Name
+              </h2>
+              <input type="text" id="user-name" name="user-name" autocomplete="given-name">
+              <input type="submit" id="name-submit" name="name-submit" value="OK">
+            </form>
+            <script class="name-select">
+              function removeNameForm() {
+                let controls = [...document.querySelectorAll('.name-select')];
+                let body = document.querySelector('body');
+                
+                controls.forEach(control => {
+                  body.removeChild(control);
+                });
+                
+                enableChat();
+              }
+              
+              function nameSubmit(evt) {
+                evt.preventDefault();
+                let name = evt.target.querySelector('#user-name').value;
+                if (name.length > 0) {
+                  localStorage.setItem('user-name', name);
+                  removeNameForm();
+                }
+              }
+              
+              document.querySelector('form#name-select').addEventListener('submit', nameSubmit);
+            </script> 
+          </template>
+          <template id="tplMessage">
+            <div class="message">
+              <div class="message-user">
+      
+              </div>
+              <div class="message-line">
+      
+              </div>
+            </div>
+          </template>
+          <template id="tplName">
+            <span class="username"> </span>
+          </template>
+
           <div class="container">
-              <div id="loader"></div>
+              <!-- <div id="loader"></div> -->
               <div id="game" class="justify-center flex-column hidden">
                 <div id="hud">
                   <div id="hud-item">
@@ -141,59 +198,15 @@
                 </div>
               </div>
             </div>
-
-          <template id="tplSelectName">
-              <form id="name-select" class="name-select">
-                <h2>
-                  Enter a Name
-                </h2>
-                <input type="text" id="user-name" name="user-name" autocomplete="given-name">
-                <input type="submit" id="name-submit" name="name-submit" value="OK">
-              </form>
-              <script class="name-select">
-                function removeNameForm() {
-                  let controls = [...document.querySelectorAll('.name-select')];
-                  let body = document.querySelector('body');
-                  
-                  controls.forEach(control => {
-                    body.removeChild(control);
-                  });
-                  
-                  enableChat();
-                }
-                
-                function nameSubmit(evt) {
-                  evt.preventDefault();
-                  let name = evt.target.querySelector('#user-name').value;
-                  if (name.length > 0) {
-                    localStorage.setItem('user-name', name);
-                    removeNameForm();
-                  }
-                }
-                
-                document.querySelector('form#name-select').addEventListener('submit', nameSubmit);
-              </script>
-            </template>
-            <template id="tplMessage">
-              <div class="message">
-                <div class="message-user">
-        
-                </div>
-                <div class="message-line">
-        
-                </div>
-              </div>
-            </template>
-            <template id="tplName">
-              <span class="username"> </span>
-            </template>
+            <div>
+              <button id="remove" ng-click="remove(expense)">Clear Local Storage</button>
+            </div>
             <script>
-              if (!(localStorage.getItem('user-name'))) {
-                document.querySelector('body').appendChild(getTemplate('tplSelectName'));
-              } else {
-                enableChat();
-              }
+              $scope.remove = function (itemTodelete) {
+             localStorage.removeItem(itemTodelete);
+        },
             </script>
+
       </div>
       <div class="div3">
           <!-- User list -->
@@ -204,7 +217,7 @@
       <div class="div4">
           <!-- Add user controls -->
           <form id="user-add">
-              <input type="text" id="chatname" name="chatname" autocomplete="off" disabled />
+              <input type="text" id="chatname" name="chatname" placeholder="Please enter players..." autocomplete="off" disabled />
               <input type="submit" id="chat-add" name="chat-add" value="Add" disabled />
           </form>
             <script>
@@ -223,10 +236,12 @@
                   tpl.querySelector('.username').innerText = conn.peer.replace('quiz-app-', '');
                   tpl.firstElementChild.connection = conn;
                   document.querySelector('#user-list').appendChild(tpl);
+                  document.querySelector('#user-score').appendChild(tpl);
                 }
                 
                 chatName.value = '';
               }
+            
               
               document.querySelector('#user-add').addEventListener('submit', addNewUser);
             </script>
@@ -240,7 +255,7 @@
       <div class="div6">
           <!-- Chat input -->
           <form id="chat-controls">
-              <input type="text" id="chatbox" name="chatbox" autocomplete="off" disabled />
+              <input type="text" id="chatbox" name="chatbox" placeholder="Enter a message..." autocomplete="off" disabled />
               <input type="submit" id="chat-send" name="chat-send" value="Send" disabled />
           </form>
           <script>
@@ -249,12 +264,11 @@
       </div>
       <div class="div7">
           <!-- All user scores -->
-          <div id="user-scores">
-              <h4>Scoreboard:</h4>
-              <p>Jim: 4</p>
-              <p>Dwight: 4</p>
-              <p>Phylis: 2</p>
-          </div>
+          <h4>Scoreboard:</h4>
+            <p id="user-name">
+              <p id="userScore"></p>
+            </p>  
+        </div>
       </div>
       </div>
 </body>
