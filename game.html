@@ -1,268 +1,58 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>APP TRIVIA - Trivia</title>
-    <link rel="stylesheet" href="game.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inria+Sans:wght@400;700&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
-    
-    <script>
-      function getTemplate(tplId) {
-        if (!("templates" in window)) {
-          window.templates = new Object();
-        }
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>APP TRIVIA - Play</title>
+    <link rel="stylesheet" type="text/css" href="game.css" />
+    <script src="game.js" defer></script>
+    <link href="https://fonts.googleapis.com/css2?family=Josefin+Sans:ital,wght@0,400;0,700;1,400&family=Open+Sans:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+  </head>
 
-        if (!(tplId in window.templates)) {
-          window.templates[tplId] = document.querySelector(`template#${tplId}`).content;
-        }
+  <body>
+    <nav class="flexContainer navBackground">
+        <ul class="nav flexItem flexStart">
+            <li><a href="/index.html">APP TRIVIA</a></li>
+        </ul>
+        <ul class="nav flexContainer flexEnd">
+            <li><a href="index.html">Home</a></li>
+            <li><a href="#">Leaderboard</a></li>
+            <li><a id="log-out" class="hidden cursorDec" onclick="onLogout()">Logout</a></li>
+        </ul>
+    </nav>
 
-        return document.importNode(window.templates[tplId], true);
-      }
-      
-      function sendChatMessage(evt) {
-        evt.preventDefault();
-        let chatlog = document.querySelector('#chat-log');
-        let chatbox = evt.target.querySelector('#chatbox');
-        let tpl = getTemplate('tplMessage');
-        tpl.querySelector('.message-line').innerHTML = window.md.render(chatbox.value);
-        tpl.querySelector('.message-user').innerText = localStorage.getItem('user-name');
-        let users = Array.from(document.querySelectorAll('#user-list > span.username'));
-        users.forEach(user => {
-          user.connection.send(tpl.firstElementChild.outerHTML);
-        });
-        chatlog.appendChild(tpl);
-        chatbox.value = '';
-      }
-      
-      function enableChat() {
-        function loadRTC() {
-          window.peer = new Peer(`quiz-app-${localStorage.getItem('user-name')}`);
-          window.peer.on('connection', conn => {
-            let tpl = getTemplate('tplName');
-            tpl.querySelector('.username').innerText = conn.peer.replace('quiz-app-', '');
-            conn.on('data', data => {
-              let chatlog = document.querySelector('#chat-log');
-              let temp = document.createElement('div');
-              temp.innerHTML = data;
-              chatlog.appendChild(temp.firstElementChild);
-            });
-            tpl.firstElementChild.connection = conn;
-            document.querySelector('#user-list').appendChild(tpl);
-            console.log(conn);
-          });
-          
-          let chatControls = Array.from(document.querySelectorAll('form#chat-controls > *, form#user-add > *'));
-          chatControls.forEach(control => {
-            control.disabled = false;
-          });
-        }
+    <div class="container"> 
+        <div id="scoreboard" class="content"></div>
         
-        let script = document.querySelector('#peerjs');
-        
-        if ('loaded' in script.classList) {
-          loadRTC();
-        } else {
-          script.addEventListener('load', () => {
-            loadRTC();
-          });
-        }
-        
-      }
-    </script>
-    <!-- import the webpage's javascript files -->
-    <script
-      src="https://cdnjs.cloudflare.com/ajax/libs/peerjs/1.2.0/peerjs.min.js"
-      defer id="peerjs"
-    ></script>
-    <script>
-      document.querySelector('#peerjs').addEventListener('load', (evt) => {
-          evt.target.classList.add('loaded');
-        });
-    </script>
-    <script
-      src="https://cdnjs.cloudflare.com/ajax/libs/markdown-it/10.0.0/markdown-it.min.js"
-      defer id="markdown"
-    ></script>
-    <script>
-      document.querySelector('#markdown').addEventListener('load', () => { window.md = window.markdownit(); });
-    </script>
-</head>
-
-<body>
-
-  <nav class="flexContainer blueBackground">
-    <ul class="nav flexItem flexStart">
-        <li><a href="/index.html">APP TRIVIA</a></li>
-    </ul>
-    <ul class="nav flexContainer flexEnd">
-        <li><a href="/index.html">Home</a></li>
-        <li><a href="#">Leaderboard</a></li>
-    </ul>
-</nav>
-  <div class="parent">
-      <!-- <div class="div1">
-          <h1>APP TRIVIA</h1>
-      </div> -->
-      <div class="div2">
-          <!-- Play area -->
-          <template id="tplSelectName">
-            <form id="name-select" class="name-select">
-              <h2>
-                Enter a Name
-              </h2>
-              <input type="text" id="user-name" name="user-name" autocomplete="given-name">
-              <input type="submit" id="name-submit" name="name-submit" value="OK">
-            </form>
-            <script class="name-select">
-              function removeNameForm() {
-                let controls = [...document.querySelectorAll('.name-select')];
-                let body = document.querySelector('body');
-                
-                controls.forEach(control => {
-                  body.removeChild(control);
-                });
-                
-                enableChat();
-              }
-              
-              function nameSubmit(evt) {
-                evt.preventDefault();
-                let name = evt.target.querySelector('#user-name').value;
-                if (name.length > 0) {
-                  localStorage.setItem('user-name', name);
-                  removeNameForm();
-                }
-              }
-              
-              document.querySelector('form#name-select').addEventListener('submit', nameSubmit);
-            </script>
-          </template>
-          <template id="tplMessage">
-            <div class="message">
-              <div class="message-user">
-      
-              </div>
-              <div class="message-line">
-      
-              </div>
-            </div>
-          </template>
-          <template id="tplName">
-            <span class="username"> </span>
-          </template>
-
-          <div class="container">
-              <div id="loader"></div>
-              <div id="game" class="justify-center flex-column hidden">
-                <div id="hud">
-                  <div id="hud-item">
-                    <p id="progressText" class="hud-prefix">
-                      Question
-                    </p>
-                  </div>
-                  <div id="hud-item">
-                      <p class="hud-prefix">
-                        Player:
-                      </p>
-                      <h1 class="hud-main-text" id="user-name">
-                        Player1
-                      </h1>
-                    </div>
-                  <div id="hud-item">
-                    <p class="hud-prefix">
-                      Score
-                    </p>
-                    <h1 class="hud-main-text" id="score">
-                      0
-                    </h1>
-                  </div>
+        <div id="question" class="content">
+            <div id="questionContent"></div>
+                <div class="question-next hide">
+                    <button id="question-next-action" onclick="onNextClick()"></button>
                 </div>
-                <h2 id="question"></h2>
-                <div class="choice-container">
-                  <p class="choice-prefix">A</p>
-                  <p class="choice-text" data-number="1"></p>
-                </div>
-                <div class="choice-container">
-                  <p class="choice-prefix">B</p>
-                  <p class="choice-text" data-number="2"></p>
-                </div>
-                <div class="choice-container">
-                  <p class="choice-prefix">C</p>
-                  <p class="choice-text" data-number="3"></p>
-                </div>
-                <div class="choice-container">
-                  <p class="choice-prefix">D</p>
-                  <p class="choice-text" data-number="4"></p>
-                </div>
-              </div>
-            </div>
-
+        </div>
+    </div>
+    <template id="tplLoginForm">
+      <div class="loginForm">
+        <form onsubmit="onLogin(event)">
+          <h3 class="nameSelect">Choose your username</h3>
+          <input type="text" name="username" style="margin-bottom: 1rem;"/>
+          <button type="submit" class="flexCenter name-select">
+            Let's Play
+          </button>
+        </form>
       </div>
-      <div class="div3">
-          <!-- User list -->
-          <div id="user-list">
-              <h4>Current players</h4>
-          </div>
+    </template>
+    <template id="tplQuestion">
+      <div>
+        <div class="question-text"></div>
+        <div class="question-options"></div>
       </div>
-      <div class="div4">
-          <!-- Add user controls -->
-          <form id="user-add">
-              <input type="text" id="chatname" name="chatname" placeholder="Please enter players..." autocomplete="off" disabled />
-              <input type="submit" id="chat-add" name="chat-add" value="Add" disabled />
-          </form>
-            <script>
-              function addNewUser(evt) {
-                evt.preventDefault();
-                let chatName = evt.target.querySelector('#chatname');
-                if (chatName.value.length > 0) {
-                  let conn = window.peer.connect(`quiz-app-${chatName.value}`);
-                  conn.on('data', data => {
-                    let chatlog = document.querySelector('#chat-log');
-                    let temp = document.createElement('div');
-                    temp.innerHTML = data;
-                    chatlog.appendChild(temp.firstElementChild);
-                  });
-                  let tpl = getTemplate('tplName');
-                  tpl.querySelector('.username').innerText = conn.peer.replace('quiz-app-', '');
-                  tpl.firstElementChild.connection = conn;
-                  document.querySelector('#user-list').appendChild(tpl);
-                  document.querySelector('#user-score').appendChild(tpl);
-                }
-                
-                chatName.value = '';
-              }
-              
-              document.querySelector('#user-add').addEventListener('submit', addNewUser);
-            </script>
-      </div>
-      <div class="div5">
-          <!-- Chat log -->
-          <div id="chat-log">
-              
-          </div>
-      </div>
-      <div class="div6">
-          <!-- Chat input -->
-          <form id="chat-controls">
-              <input type="text" id="chatbox" name="chatbox" placeholder="Enter a message..." autocomplete="off" disabled />
-              <input type="submit" id="chat-send" name="chat-send" value="Send" disabled />
-          </form>
-          <script>
-              document.querySelector('form#chat-controls').addEventListener('submit', sendChatMessage);
-          </script>
-      </div>
-      <div class="div7">
-          <!-- All user scores -->
-          <h4>Scoreboard</h4>
-            <div id="user-scores">
-              <p class="user-name">
-                <p class="userScore"></p>
-              </p>
-              
-          </div>
-      </div>
-      </div>
-      <script src="game.js"></script>
-</body>
+    </template>
+    <template id="tplPlayer">
+      <div class="player">
+        <div class="player-username"></div>
+        <div class="player-score"></div>
+     </div>
+    </template>
+  </body>
 </html>

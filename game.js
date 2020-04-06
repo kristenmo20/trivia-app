@@ -1,114 +1,214 @@
-const question = document.getElementById("question");
-const choices = Array.from(document.getElementsByClassName("choice-text"));
-const progressText = document.getElementById("progressText");
-const userScores = document.getElementById("userScores");
-const scoreText = document.getElementById("score");
-const progressBarFull = document.getElementById("progressBarFull");
-const loader = document.getElementById("loader");
-const game = document.getElementById("game");
-let currentQuestion = {};
-let acceptingAnswers = false;
-let score = 0;
-let userScore = score;
-let questionCounter = 0;
-let availableQuesions = [];
+const USER_NAME = "username";
 
-let questions = [];
+function fetchUser() {
+    return localStorage.getItem(USER_NAME);
+}
 
-fetch(
-  "https://opentdb.com/api.php?amount=10&category=9&difficulty=easy&type=multiple"
-)
-  .then(res => {
-    return res.json();
-  })
-  .then(loadedQuestions => {
-    console.log(loadedQuestions.results);
-    questions = loadedQuestions.results.map(loadedQuestion => {
-      const formattedQuestion = {
-        question: loadedQuestion.question
-      };
+function setUser(value) {
+    if (value) {
+        localStorage.setItem(USER_NAME, value);
+    } else {
+        localStorage.removeItem(USER_NAME);
+    }
+    refreshUser();
+}
 
-      const answerChoices = [...loadedQuestion.incorrect_answers];
-      formattedQuestion.answer = Math.floor(Math.random() * 3) + 1;
-      answerChoices.splice(
-        formattedQuestion.answer - 1,
-        0,
-        loadedQuestion.correct_answer
-      );
+function refreshScoreboard(players) {
+    const currentUser = fetchUser();
+    const scoreboardElement = document.querySelector("#scoreboard");
+    const template = document.querySelector("#tplPlayer");
 
-      answerChoices.forEach((choice, index) => {
-        formattedQuestion["choice" + (index + 1)] = choice;
-      });
+    players = players.map(player => {
+        let { username, score } = player;
+        const playerElement = template.content.cloneNode(true);
 
-      return formattedQuestion;
-    });
+        if (username === currentUser) {
+            username += " - You";
+            playerElement.firstElementChild.classList.add("current-user");
+        }
 
-    startGame();
-  })
-  .catch(err => {
-    console.error(err);
-  });
+        playerElement.querySelector(".player-username").innerText = username;
+        playerElement.querySelector(".player-score").innerText = score;
 
-//CONSTANTS
-const CORRECT_BONUS = 1;
-const MAX_QUESTIONS = 10;
+        return playerElement.firstElementChild.outerHTML;
+    }).join("");
 
-startGame = () => {
-  questionCounter = 0;
-  score = 0;
-  availableQuesions = [...questions];
-  getNewQuestion();
-  game.classList.remove("hidden");
-  loader.classList.add("hidden");
-};
+    scoreboardElement.innerHTML = players;
+}
 
-getNewQuestion = () => {
-  if (availableQuesions.length === 0 || questionCounter >= MAX_QUESTIONS) {
-    localStorage.setItem("mostRecentScore", score);
-    //go to the end page
-    return window.location.assign("/end.html");
-  }
-  questionCounter++;
-  progressText.innerText = `Question ${questionCounter}/${MAX_QUESTIONS}`;
+function onLogin(event) {
+    event.preventDefault();
+    const targetElement = event.target;
+    const parentElement = targetElement.parentElement;
+    const value = targetElement.querySelector("input[type=text]").value;
+    if (value) {
+        setUser(value);
+        placeholderData();
+    }
+}
 
-  const questionIndex = Math.floor(Math.random() * availableQuesions.length);
-  currentQuestion = availableQuesions[questionIndex];
-  question.innerHTML = currentQuestion.question;
-
-  choices.forEach(choice => {
-    const number = choice.dataset["number"];
-    choice.innerHTML = currentQuestion["choice" + number];
-  });
-
-  availableQuesions.splice(questionIndex, 1);
-  acceptingAnswers = true;
-};
-
-choices.forEach(choice => {
-  choice.addEventListener("click", e => {
-    if (!acceptingAnswers) return;
-
-    acceptingAnswers = false;
-    const selectedChoice = e.target;
-    const selectedAnswer = selectedChoice.dataset["number"];
-
-    const classToApply =
-      selectedAnswer == currentQuestion.answer ? "correct" : "incorrect";
-
-    if (classToApply === "correct") {
-      incrementScore(CORRECT_BONUS);
+function onLogout() {
+        setUser(null);
+        refreshScoreboard([]);
+        refreshQuestion();
     }
 
-    selectedChoice.parentElement.classList.add(classToApply);
+function refreshUser() {
+    const user = fetchUser();
+    let loginElm = document.querySelector(".loginForm");
+    if (user) {
+        if (loginElm) {
+            loginElm.addEventListener("animationend", () => {
+                loginElm.remove();
+            });
+            loginElm.classList.add("puff-out-center");
+        }
+    } else {
+        if (!loginElm) {
+            const template = document.querySelector("#tplLoginForm");
+            loginElm = template.content.cloneNode(true);
+            document.body.append(loginElm.firstElementChild);
+        }
+    }
+}
 
-    setTimeout(() => {
-      selectedChoice.parentElement.classList.remove(classToApply);
-      getNewQuestion();
-    }, 1000);
-  });
-});
+function placeholderData() {
+    refreshScoreboard([{
+        username: fetchUser(),
+        score: 50
+    }, {
+        username: "Jim",
+        score: 70
+    }, {
+        username: "Dwight",
+        score: 70
+    }]);
 
-incrementScore = num => {
-  score += num;
-  scoreText.innerText = score;
-};
+    refreshQuestion({
+        text: "What is the acronym for Hyper Text Markup Language?",
+        type: "radio",
+        moreQuestions: true,
+        options: [{
+            text: "HTML",
+            valid: true
+        }, {
+            text: "XML",
+            valid: false
+        },{
+            text: "CSS",
+            valid: false
+        },{
+            text: "XHTML",
+            valid: false
+        }]
+    });
+}
+
+function refreshQuestion(data) {
+    const questionContent = document.querySelector("#questionContent");
+    const prevQuestionElement = questionContent.firstElementChild;
+
+    if (data) {
+        const template = document.querySelector("#tplQuestion");
+        const questEl = template.content.cloneNode(true);
+        const questionEl = questEl.firstElementChild;
+
+        let { text, type, options, moreQuestions } = data;
+        questEl.querySelector(".question-text").innerText = text;
+
+        const isRadio = type === "radio";
+        options = options.map((option, index) => {
+            return `<label><input type="${type}" name="${isRadio && "radio" || `${type}-index`
+                }">${option.text}</label>`;
+        }).join("");
+        questEl.querySelector(".question-options").innerHTML = options;
+
+        const nextQuestionEl = document.querySelector(".question-next");
+        nextQuestionEl.classList.toggle("show", false);
+        nextQuestionEl.classList.toggle("hide", true);
+
+        const nextActionEl = nextQuestionEl.querySelector("#question-next-action");
+        if (moreQuestions) {
+            nextActionEl.innerText = "Next";
+        } else {
+            nextActionEl.innerText = "Finish";
+        }
+        nextActionEl.classList.toggle("finish", !moreQuestions);
+
+        const toggleQuestionElement = () => {
+            questionEl.classList.add("slide-in-left");
+            questionEl.addEventListener("animationend", () => {
+                nextQuestionEl.classList.toggle("hide", false);
+                nextQuestionEl.classList.toggle("show", true);
+            });
+            questionContent.appendChild(questionEl);
+        };
+
+        if (prevQuestionElement) {
+            prevQuestionElement.addEventListener("animationend", () => {
+                prevQuestionElement.remove();
+                toggleQuestionElement();
+            });
+            prevQuestionElement.classList.add("slide-out-right");
+        } else {
+            toggleQuestionElement();
+        }
+    } else if (prevQuestionElement) {
+        prevQuestionElement.remove();
+    }
+
+    window.currentQuestion = data;
+}
+
+
+
+function onNextClick() {
+    const currentQuestion = window.currentQuestion;
+    if (currentQuestion) {
+        const { type, moreQuestions, options } = currentQuestion;
+
+        const optionsEl = [...document.querySelector(".question-options").childNodes];
+        const selectedOptions = [];
+        options.forEach((option, index) => {
+            const optionEl = optionsEl[index];
+            if (optionEl
+                && ((optionEl.firstElementChild
+                    && optionEl.firstElementChild.checked)
+                    || optionEl.value)) {
+                selectedOptions.push(option);
+            }
+        });
+
+        if (!selectedOptions.length && !confirm("Are you sure, do you want to skip this question?")) {
+            return false;
+        }
+
+        if (moreQuestions) {
+            refreshQuestion({
+                text: "What is the opposite of right?",
+                type: "radio",
+                moreQuestions: false,
+                options: [{
+                    text: "Up",
+                    valid: false
+                }, {
+                    text: "Down",
+                    valid: false
+                }, {
+                    text: "Diagonal",
+                    valid: false
+                }, {
+                    text: "left",
+                    valid: true
+                }]
+            });
+        } else {
+
+        }
+    }
+}
+
+refreshUser();
+if (fetchUser()) {
+    placeholderData();
+}
