@@ -173,7 +173,7 @@ input[type="text"]:focus {
   transform: translate(-40%, -40%);
 }
 
-#logout {
+#log-out {
   margin-left: auto;
   color: whitesmoke;
 }
@@ -465,3 +465,4 @@ li>a {
     display: flex;
     justify-content: flex-end;
 }
+

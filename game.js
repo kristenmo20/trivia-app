@@ -179,9 +179,6 @@ function onNextClick() {
             }
         });
 
-        if (!selectedOptions.length && !confirm("Are you sure, do you want to skip this question?")) {
-            return false;
-        }
 
         if (moreQuestions) {
             refreshQuestion({
@@ -212,3 +209,4 @@ refreshUser();
 if (fetchUser()) {
     placeholderData();
 }
+
