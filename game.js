@@ -1,14 +1,14 @@
-const USER_NAME = "username";
+const userName = "username";
 
 function fetchUser() {
-    return localStorage.getItem(USER_NAME);
+    return localStorage.getItem(userName);
 }
 
 function setUser(value) {
     if (value) {
-        localStorage.setItem(USER_NAME, value);
+        localStorage.setItem(userName, value);
     } else {
-        localStorage.removeItem(USER_NAME);
+        localStorage.removeItem(userName);
     }
     refreshUser();
 }
