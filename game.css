@@ -424,6 +424,7 @@ input[type="text"]:focus {
 
 .nav {
     list-style: none;
+    width: max-content;
   }
 
 .nav a {
