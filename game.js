@@ -1,4 +1,12 @@
+if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.register("serviceworker.js");
+}
+
 const userName = "username";
+
+let peer;
+let conn;
+let session;
 
 function fetchUser() {
     return localStorage.getItem(userName);
@@ -39,11 +47,12 @@ function refreshScoreboard(players) {
 function onLogin(event) {
     event.preventDefault();
     const targetElement = event.target;
-    const parentElement = targetElement.parentElement;
-    const value = targetElement.querySelector("input[type=text]").value;
-    if (value) {
+    const usernameElement = targetElement.querySelector("input[name=username]");
+    const user = usernameElement.value || fetchUser();
+    const codeElement = targetElement.querySelector("input[name=code]");
+    if (user) {
+        session = codeElement.value;
         setUser(value);
-        placeholderData();
     }
 }
 
@@ -55,20 +64,32 @@ function onLogout() {
 
 function refreshUser() {
     const user = fetchUser();
-    let loginElm = document.querySelector(".loginForm");
-    if (user) {
-        if (loginElm) {
-            loginElm.addEventListener("animationend", () => {
-                loginElm.remove();
+    // const logoutElement = document.querySelector("#log-out");
+
+    if (peer) {
+        peer.destroy();
+        peer = null;
+    }
+
+    let loginElement = document.querySelector(".loginForm");
+    if (user && session !== void 0) {
+        peer = new peer(`trivia-app-${user}`);
+        peer.on("open", onPeerOpen);
+        peer.on("close", onPeerClose);
+
+        if (loginElemnt) {
+            loginElement.addEventListener("animationed", () => {
+                loginElement.remove();
             });
-            loginElm.classList.add("puff-out-center");
+            loginElement.classList.add("puff-out-center");
         }
     } else {
-        if (!loginElm) {
+        if (!loginElement) {
             const template = document.querySelector("#tplLoginForm");
-            loginElm = template.content.cloneNode(true);
-            document.body.append(loginElm.firstElementChild);
+            loginElement = template.content.cloneNode(true).firstElementChild;
+            document.body.append(loginElement);
         }
+        loginElement.querySelector(".user-login").classList.toggle("hidden", !!user);
     }
 }
 
@@ -118,28 +139,27 @@ function refreshQuestion(data) {
 
         const isRadio = type === "radio";
         options = options.map((option, index) => {
-            return `<label><input type="${type}" name="${isRadio && "radio" || `${type}-index`
-                }">${option.text}</label>`;
+            return `<label><input type="${type}" name="${isRadio && "radio" || `${type}-index`}">${option.text}</label>`;
         }).join("");
         questEl.querySelector(".question-options").innerHTML = options;
 
         const nextQuestionEl = document.querySelector(".question-next");
-        nextQuestionEl.classList.toggle("show", false);
-        nextQuestionEl.classList.toggle("hide", true);
+        nextQuestionEl.classList.toggle("visible", false);
+        nextQuestionEl.classList.toggle("invisible", true);
 
         const nextActionEl = nextQuestionEl.querySelector("#question-next-action");
         if (moreQuestions) {
             nextActionEl.innerText = "Next";
         } else {
-            nextActionEl.innerText = "Finish";
+            nextActionEl.innerText = "End";
         }
-        nextActionEl.classList.toggle("finish", !moreQuestions);
+        nextActionEl.classList.toggle("end", !moreQuestions);
 
         const toggleQuestionElement = () => {
             questionEl.classList.add("slide-in-left");
             questionEl.addEventListener("animationend", () => {
-                nextQuestionEl.classList.toggle("hide", false);
-                nextQuestionEl.classList.toggle("show", true);
+                nextQuestionEl.classList.toggle("invisible", false);
+                nextQuestionEl.classList.toggle("visible", true);
             });
             questionContent.appendChild(questionEl);
         };
@@ -195,7 +215,7 @@ function onNextClick() {
                     text: "Diagonal",
                     valid: false
                 }, {
-                    text: "left",
+                    text: "Left",
                     valid: true
                 }]
             });
@@ -210,3 +230,34 @@ if (fetchUser()) {
     placeholderData();
 }
 
+function onPeerOpen() {
+    peer.on("connection", onPeerConnection);
+    if (session) {
+        peer.connect(session);
+    }
+    placeholderData();
+}
+
+function onPeerClose() {
+    conn = null;
+}
+
+function onPeerConnection(newConn) {
+    conn = newConn;
+    conn.on("data", function(data) {
+        console.log(`Data recieved: ${JSON.stringify(data)}`);
+    });
+}
+
+function isDocumentReady() {
+    if (document.readyState === "complete") {
+        document.onreadystatechange = null;
+        refreshUser();
+        return true;
+    }
+    return false;
+}
+
+if (!isDocumentReady()) {
+    document.onreadystatechange = isDocumentReady;
+}

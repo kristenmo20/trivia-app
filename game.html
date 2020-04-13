@@ -6,6 +6,7 @@
     <title>APP TRIVIA - Play</title>
     <link rel="stylesheet" type="text/css" href="game.css" />
     <script src="game.js" defer></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/peerjs/1.2.0/peerjs.min.js" defer></script>
     <link href="https://fonts.googleapis.com/css2?family=Josefin+Sans:ital,wght@0,400;0,700;1,400&family=Open+Sans:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
   </head>
 
@@ -32,13 +33,17 @@
     <template id="tplLoginForm">
       <div class="loginForm">
         <form onsubmit="onLogin(event)">
-          <h3 class="nameSelect">Choose your username</h3>
-          <input type="text" name="username" style="margin-bottom: 1rem;"/>
-          <button type="submit" class="flexCenter name-select">
-            Let's Play
-          </button>
-        </form>
+          <div class="user-login">
+            <h3 class="nameSelect">Choose your username</h3>
+            <input type="text" name="username" class="mbot"/>
+        </div>
       </div>
+      <div class="pin">
+        <h3 class="nameSelect">Enter your code</h3>
+        <input type="text" class="mbot" name="code"/>
+      </div>
+      <button type="submit" class="flexCenter name-select">Let's Play</button>
+    </form>
     </template>
     <template id="tplQuestion">
       <div>

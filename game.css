@@ -286,7 +286,7 @@ input[type="text"]:focus {
   justify-content: space-evenly;
 }
 
-.finish {
+.end {
   font-style: italic;
 }
 
@@ -467,3 +467,6 @@ li>a {
     justify-content: flex-end;
 }
 
+.mbot {
+  margin-bottom: 1rem;
+}
