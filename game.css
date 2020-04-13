@@ -82,6 +82,7 @@ input[type="text"]:focus {
     margin-bottom: 1.25rem;
     font-size: 1.625rem;
     text-transform: capitalize;
+    text-align: center;
 }
 
 .cursorDec {
@@ -469,4 +470,8 @@ li>a {
 
 .mbot {
   margin-bottom: 1rem;
+}
+
+.textCenter {
+  text-align: center;
 }
