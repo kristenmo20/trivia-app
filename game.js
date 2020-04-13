@@ -52,7 +52,7 @@ function onLogin(event) {
     const codeElement = targetElement.querySelector("input[name=code]");
     if (user) {
         session = codeElement.value;
-        setUser(value);
+        setUser(user);
     }
 }
 
