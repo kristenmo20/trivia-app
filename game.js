@@ -73,7 +73,7 @@ function refreshUser() {
 
     let loginElement = document.querySelector(".loginForm");
     if (user && session !== void 0) {
-        peer = new peer(`trivia-app-${user}`);
+        peer = new Peer(`trivia-app-${user}`);
         peer.on("open", onPeerOpen);
         peer.on("close", onPeerClose);
 

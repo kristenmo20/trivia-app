@@ -1,16 +1,15 @@
 const VERSION = 1;
 const CACHE_NAME = `precache-v${VERSION}`;
-const URLS_TO_CACHE = ["index.html", "home-styles.css", "game.js", "game.html", "game.css"];
+const URL_CACHE = ["index.html", "home-styles.css", "game.js", "game.html", "game.css"];
 
 self.addEventListener("install", event => {
     event.waitUntil(
-        caches.open(CACHE_NAME).then(cache => cache.addAll(URLS_TO_CACHE))
+        caches.open(CACHE_NAME).then(cache => cache.addAll(URL_CACHE))
     );
 });
 
 self.addEventListener("activate", event => {
-    event.waitUntil(
-        caches
+    event.waitUntil(caches
             .keys()
             .then(items => items.filter(item => item !== CACHE_NAME))
             .then(items => Promise.all(items.map(item => caches.delete(item))))
