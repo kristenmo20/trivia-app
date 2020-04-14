@@ -77,7 +77,7 @@ function refreshUser() {
         peer.on("open", onPeerOpen);
         peer.on("close", onPeerClose);
 
-        if (loginElemnt) {
+        if (loginElement) {
             loginElement.addEventListener("animationed", () => {
                 loginElement.remove();
             });
