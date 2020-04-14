@@ -64,7 +64,7 @@ function onLogout() {
 
 function refreshUser() {
     const user = fetchUser();
-    // const logoutElement = document.querySelector("#log-out");
+    const logoutElement = document.querySelector("#log-out");
 
     if (peer) {
         peer.destroy();
@@ -74,8 +74,8 @@ function refreshUser() {
     let loginElement = document.querySelector(".loginForm");
     if (user && session !== void 0) {
         peer = new Peer(`trivia-app-${user}`);
-        peer.on("open", onPeerOpen);
-        peer.on("close", onPeerClose);
+        peer.on("open", peerOpen);
+        peer.on("close", peerClose);
 
         if (loginElement) {
             loginElement.addEventListener("animationed", () => {
@@ -193,12 +193,10 @@ function onNextClick() {
             const optionEl = optionsEl[index];
             if (optionEl
                 && ((optionEl.firstElementChild
-                    && optionEl.firstElementChild.checked)
-                    || optionEl.value)) {
+                    && optionEl.firstElementChild.checked) || optionEl.value)) {
                 selectedOptions.push(option);
             }
         });
-
 
         if (moreQuestions) {
             refreshQuestion({
@@ -220,7 +218,7 @@ function onNextClick() {
                 }]
             });
         } else {
-
+            //Do nothing.
         }
     }
 }
@@ -230,34 +228,22 @@ if (fetchUser()) {
     placeholderData();
 }
 
-function onPeerOpen() {
-    peer.on("connection", onPeerConnection);
+function peerOpen() {
+    peer.on("connection", peerConnection);
     if (session) {
         peer.connect(session);
     }
     placeholderData();
 }
 
-function onPeerClose() {
+function peerClose() {
     conn = null;
 }
 
-function onPeerConnection(newConn) {
+function peerConnection(newConn) {
     conn = newConn;
     conn.on("data", function(data) {
         console.log(`Data recieved: ${JSON.stringify(data)}`);
     });
 }
 
-function isDocumentReady() {
-    if (document.readyState === "complete") {
-        document.onreadystatechange = null;
-        refreshUser();
-        return true;
-    }
-    return false;
-}
-
-if (!isDocumentReady()) {
-    document.onreadystatechange = isDocumentReady;
-}
